@@ -1,87 +1,712 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ceve.tech</title>
-    <style>
-        body {
-            font-family: 'Quicksand', sans-serif;
-            background-color: #f0f0f0;
-            margin: 0;
-            padding: 0;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Electrical Pit Test Practice</title>
+  <style>
+    :root {
+      --bg: #f6f8fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --success: #047857;
+      --error: #b91c1c;
+      --border: #e5e7eb;
+    }
 
-        header {
-            background-color: #333;
-            color: #fff;
-            text-align: center;
-            padding: 1em;
-        }
+    * { box-sizing: border-box; }
 
-        a {
-            font-size: 50px;
-            color: white;
-            margin: 0;
-            text-decoration: none;
-        }
-        .text {
-            font-size: 30px;
-            color: darkslategray;
-            margin: 0;
-            text-decoration: none;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-            display: flex;
-        }
-        video {
-            height: 80vh;
-            margin: 0 auto;
-        }
-        .text {
-            margin-top: 20px;
-            position: absolute;
-            font-size: 24px;
-            animation: bounce 2s infinite;
-        }
-        .text1 {
-            margin-left: 120vh;
-        }
-        @keyframes bounce {
-            0%, 100% {
-                transform: translate(0, 0);
-            }
-            25% {
-                transform: translate(0, -100%);
-            }
-            50% {
-                transform: translate(100%, -100%);
-            }
-            75% {
-                transform: translate(100%, 0);
-            }
-        }
-    </style>
+    body {
+      margin: 0;
+      font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 860px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+    }
+
+    .top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 1.45rem;
+      letter-spacing: 0.2px;
+    }
+
+    .meta {
+      color: var(--muted);
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+
+    .progress-wrap {
+      width: 100%;
+      height: 10px;
+      border-radius: 999px;
+      background: #eef2ff;
+      overflow: hidden;
+      margin: 10px 0 18px;
+    }
+
+    .progress {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #60a5fa, #2563eb);
+      transition: width 220ms ease;
+    }
+
+    .question {
+      font-size: 1.14rem;
+      line-height: 1.45;
+      margin-bottom: 14px;
+      font-weight: 650;
+    }
+
+    .options {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .option {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 13px;
+      cursor: pointer;
+      transition: border-color 140ms ease, background 140ms ease;
+    }
+
+    .option:hover {
+      border-color: #c7d2fe;
+      background: #f8faff;
+    }
+
+    .option input { margin-top: 2px; }
+
+    .feedback {
+      border-radius: 12px;
+      padding: 12px 13px;
+      margin-bottom: 16px;
+      display: none;
+      line-height: 1.5;
+      font-size: 0.97rem;
+    }
+
+    .feedback.ok {
+      display: block;
+      background: #ecfdf5;
+      border: 1px solid #a7f3d0;
+      color: var(--success);
+    }
+
+    .feedback.bad {
+      display: block;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: var(--error);
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: 0;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 0.95rem;
+      font-weight: 650;
+      cursor: pointer;
+    }
+
+    .primary {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .primary:hover { background: var(--accent-hover); }
+
+    .secondary {
+      background: #eef2ff;
+      color: #1e3a8a;
+    }
+
+    .secondary:hover { background: #e0e7ff; }
+
+    .secondary:disabled, .primary:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    .result {
+      display: none;
+      margin-top: 8px;
+      border-top: 1px solid var(--border);
+      padding-top: 16px;
+    }
+
+    .result h2 {
+      margin: 0 0 8px;
+      font-size: 1.2rem;
+    }
+
+    .small {
+      color: var(--muted);
+      margin: 4px 0 0;
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 0.92rem;
+      margin: 0 0 10px;
+    }
+
+    .match-grid {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .match-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      align-items: center;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      background: #fff;
+    }
+
+    .match-row select {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      font-size: 0.95rem;
+      background: #fff;
+      color: var(--text);
+    }
+
+    .drag-list {
+      list-style: none;
+      margin: 0 0 18px;
+      padding: 0;
+      display: grid;
+      gap: 10px;
+    }
+
+    .drag-item {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      background: #fff;
+      cursor: grab;
+      user-select: none;
+    }
+
+    .drag-item.dragging {
+      opacity: 0.45;
+    }
+
+    .drag-item.over {
+      border-color: #93c5fd;
+      background: #eff6ff;
+    }
+  </style>
 </head>
 <body>
-    <header>
-        <a href="http://ceve.tech">ceve.tech</a>
-    </header>
-    <div class="container">
-        <div class="text"><a class="text" href="http://ceve.tech">ceve.tech</a></div>
-        <a class="text text1" href="http://ceve.tech">ceve.tech</a>
-        
-            <video controls>
-                <source src="assets/WhoDidItBest.mp4" type="video/mp4">
-            </video>
-            <!-- Character 2 -->
+  <main class="app">
+    <div class="top">
+      <h1>Electrical Pit Test Practice</h1>
+      <div class="meta" id="meta">Question 1 / 23</div>
+    </div>
 
+    <div class="progress-wrap" aria-hidden="true">
+      <div class="progress" id="progress"></div>
+    </div>
 
-            <!-- Add more character entries here -->
+    <section id="quizSection">
+      <div class="question" id="question"></div>
+      <div class="options" id="options"></div>
+      <div class="feedback" id="feedback"></div>
+x
+      <div class="actions">
+        <button class="primary" id="submitBtn">Check Answer</button>
+        <button class="secondary" id="nextBtn" disabled>Next</button>
+      </div>
+    </section>
 
-        </div>
+    <section class="result" id="resultSection">
+      <h2 id="resultTitle"></h2>
+      <p class="small" id="resultText"></p>
+      <div class="actions" style="margin-top: 12px;">
+        <button class="primary" id="restartBtn">Practice Again</button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const questions = [
+      {
+        type: 'mcq',
+        question: 'Before a match, a fresh battery should usually read:',
+        options: ['>12.8V @ 18A and <0.02 ohms', '11.5V @ 0A and 0.04 ohms', '12.0V @ 40A and 0.08 ohms', 'Any value is fine if the charger says done'],
+        answer: 0,
+        explanation: 'Comp-ready battery target is over 12.8V at 18A and less than 0.02 ohms internal resistance.'
+      },
+      {
+        type: 'mcq',
+        question: 'Safe battery insertion orientation in the robot is:',
+        options: ['Upside down so it cannot slide out', 'Sideways with the positive wire on top', 'Sideways with negative wire on top', 'Vertical with terminals facing down'],
+        answer: 1,
+        explanation: 'Team standard is sideways insertion with the positive lead on top.'
+      },
+      {
+        type: 'mcq',
+        question: 'How do you quickly use a battery beak?',
+        options: ['Plug in, press once, check color only', 'Plug in and hold for 10 seconds', 'Plug in connector, press button twice, then read voltage and resistance', 'Connect to PDH first, then read battery beak'],
+        answer: 2,
+        explanation: 'Plug into the battery connector, press the button twice, then read voltage and internal resistance.'
+      },
+      {
+        type: 'mcq',
+        question: 'A battery reads V2 = 10.795V @ 18A and Rint = 0.040 ohms. Competition ready?',
+        options: ['Yes, because resistance is all that matters', 'No, voltage is too low (and resistance is high)', 'Yes, if used for auto only', 'No, but only because 0A value is missing'],
+        answer: 1,
+        explanation: 'Reject it first because voltage is too low; resistance is also high.'
+      },
+      {
+        type: 'mcq',
+        question: 'CAN wire colors and meaning are:',
+        options: ['Green high, yellow low', 'Yellow high, green low', 'Red high, black low', 'Blue high, white low'],
+        answer: 1,
+        explanation: 'Yellow is CAN high and green is CAN low in your guide.'
+      },
+      {
+        type: 'mcq',
+        question: 'Main robot CAN topology (non-CANivore loop) is best described as:',
+        options: ['Star from roboRIO to each device', 'Daisy-chain starting at roboRIO and ending at PDH', 'Ring that returns to roboRIO', 'Parallel bus ending at radio'],
+        answer: 1,
+        explanation: 'Your notes specify daisy-chain from roboRIO through devices to PDH.'
+      },
+      {
+        type: 'mcq',
+        question: 'The separate CANivore loop should end with:',
+        options: ['A 40A breaker', 'A ferrule connector', 'A 120-ohm resistor', 'A Limelight'],
+        answer: 2,
+        explanation: 'The CANivore loop is terminated with a 120Ω resistor.'
+      },
+      {
+        type: 'mcq',
+        question: 'What connectors typically connect motor controllers to motors?',
+        options: ['Ferrules', 'Anderson Powerpole connectors', 'RJ45 connectors', 'BNC connectors'],
+        answer: 1,
+        explanation: 'Controller-to-motor connections use Anderson Powerpole connectors.'
+      },
+      {
+        type: 'mcq',
+        question: 'What connector type goes into PDH screw terminals?',
+        options: ['Ferrules', 'Powerpoles', 'XT60', 'Bullet connectors'],
+        answer: 0,
+        explanation: 'PDH screw terminals should use ferrules for proper clamp contact.'
+      },
+      {
+        type: 'mcq',
+        question: 'To check if a chassis is energized by a 12V short, a multimeter should be set to:',
+        options: ['DC 20V range', 'DC 2V range', 'AC 200V range', '20mA current range'],
+        answer: 0,
+        explanation: 'A 12V fault is best checked on the DC 20V range.'
+      },
+      {
+        type: 'mcq',
+        question: 'Which wire is larger: 12 AWG or 18 AWG?',
+        options: ['18 AWG', '12 AWG', 'Same size', 'Depends on insulation color'],
+        answer: 1,
+        explanation: 'In AWG, smaller number means larger conductor.'
+      },
+      {
+        type: 'mcq',
+        question: 'What gauge is used for battery-breaker-PDH wiring?',
+        options: ['18 AWG', '12 AWG', '10 AWG', '6 AWG'],
+        answer: 3,
+        explanation: 'Main high-current battery path uses 6 AWG.'
+      },
+      {
+        type: 'mcq',
+        question: 'What gauge is used for Krakens specifically?',
+        options: ['18 AWG', '12 AWG', '10 AWG', '6 AWG'],
+        answer: 2,
+        explanation: 'Krakens are wired with 10 AWG in your standard.'
+      },
+      {
+        type: 'mcq',
+        question: 'What gauge is used for other motors?',
+        options: ['12 AWG', '10 AWG', '18 AWG', '22 AWG'],
+        answer: 0,
+        explanation: 'Other motors use 12 AWG.'
+      },
+      {
+        type: 'mcq',
+        question: 'What gauge is used for CANCoders, roboRIO, and radio power?',
+        options: ['22 AWG', '18 AWG', '12 AWG', '10 AWG'],
+        answer: 1,
+        explanation: 'Low-power device feeds use 18 AWG.'
+      },
+      {
+        type: 'mcq',
+        question: 'What gauge is used for CAN wires?',
+        options: ['22 AWG', '18 AWG', '12 AWG', '6 AWG'],
+        answer: 0,
+        explanation: 'CAN wiring uses 22 AWG.'
+      },
+      {
+        type: 'mcq',
+        question: 'Two ways to check if a fuse is blown are:',
+        options: ['Smell test and battery beak', 'Continuity test and visual check for broken element', 'Voltage drop and tug test', 'Current clamp and LED color'],
+        answer: 1,
+        explanation: 'Use multimeter continuity and visual element inspection.'
+      },
+      {
+        type: 'mcq',
+        question: 'When crimping a ferrule, what part do you crimp?',
+        options: ['The plastic sleeve', 'The metal part', 'Half metal and half insulation', 'Only the wire strands'],
+        answer: 1,
+        explanation: 'You crimp the metal barrel, not the plastic collar.'
+      },
+      {
+        type: 'mcq',
+        question: 'How is a CANivore connected to the roboRIO?',
+        options: ['Ethernet cable', 'PWM cable', 'USB-C cable', 'DIO cable'],
+        answer: 2,
+        explanation: 'Connection is USB-C from roboRIO to CANivore.'
+      },
+      {
+        type: 'tf',
+        question: 'True or False: PDH voltage display can replace a battery beak for battery health checks.',
+        answer: false,
+        explanation: 'False. PDH voltage is at current robot draw; battery beak uses fixed test loads and comparable battery health values.'
+      },
+      {
+        type: 'tf',
+        question: 'True or False: Most sensor wires plug into roboRIO DIO ports.',
+        answer: true,
+        explanation: 'True. Your guide calls out DIO as the common sensor connection area.'
+      },
+      {
+        type: 'matching',
+        question: 'Match each wire gauge to its typical use.',
+        leftItems: ['6 AWG', '10 AWG', '18 AWG', '22 AWG'],
+        rightOptions: ['Battery/Breaker/PDH', 'Krakens', 'CANCoders/RIO/Radio power', 'CAN wires'],
+        answerMap: {
+          '6 AWG': 'Battery/Breaker/PDH',
+          '10 AWG': 'Krakens',
+          '18 AWG': 'CANCoders/RIO/Radio power',
+          '22 AWG': 'CAN wires'
+        },
+        explanation: 'These pairings come directly from your wiring standards.'
+      },
+      {
+        type: 'dragdrop',
+        question: 'Drag and drop to put Anderson connector assembly steps in the correct order.',
+        items: ['Strip wire to contact crimp length', 'Crimp contact onto stripped wire', 'Slide contact into housing', 'Pull test'],
+        correctOrder: ['Strip wire to contact crimp length', 'Crimp contact onto stripped wire', 'Slide contact into housing', 'Pull test'],
+        explanation: 'Correct order is prep wire, crimp, insert into housing, then verify with pull test.'
+      }
+    ];
+
+    let current = 0;
+    let score = 0;
+    let locked = false;
+    let dragOrder = [];
+    let draggingIndex = null;
+
+    const meta = document.getElementById('meta');
+    const progress = document.getElementById('progress');
+    const questionEl = document.getElementById('question');
+    const optionsEl = document.getElementById('options');
+    const feedbackEl = document.getElementById('feedback');
+    const submitBtn = document.getElementById('submitBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const resultSection = document.getElementById('resultSection');
+    const resultTitle = document.getElementById('resultTitle');
+    const resultText = document.getElementById('resultText');
+    const restartBtn = document.getElementById('restartBtn');
+    const quizSection = document.getElementById('quizSection');
+
+    function shuffled(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function renderMcqOrTf(q) {
+      const isTf = q.type === 'tf';
+      const choices = isTf ? ['True', 'False'] : q.options;
+      const hint = document.createElement('p');
+      hint.className = 'hint';
+      hint.textContent = isTf ? 'Choose True or False.' : 'Choose one answer.';
+      optionsEl.appendChild(hint);
+
+      choices.forEach((optionText, index) => {
+        const label = document.createElement('label');
+        label.className = 'option';
+
+        const input = document.createElement('input');
+        input.type = 'radio';
+        input.name = 'answer';
+        input.value = String(index);
+
+        const span = document.createElement('span');
+        span.textContent = optionText;
+
+        label.appendChild(input);
+        label.appendChild(span);
+        optionsEl.appendChild(label);
+      });
+    }
+
+    function renderMatching(q) {
+      const hint = document.createElement('p');
+      hint.className = 'hint';
+      hint.textContent = 'Match each left item to one right-side choice.';
+      optionsEl.appendChild(hint);
+
+      const grid = document.createElement('div');
+      grid.className = 'match-grid';
+
+      q.leftItems.forEach((leftItem) => {
+        const row = document.createElement('div');
+        row.className = 'match-row';
+
+        const left = document.createElement('div');
+        left.textContent = leftItem;
+
+        const select = document.createElement('select');
+        select.dataset.left = leftItem;
+
+        const placeholder = document.createElement('option');
+        placeholder.value = '';
+        placeholder.textContent = 'Select a match';
+        select.appendChild(placeholder);
+
+        shuffled(q.rightOptions).forEach((opt) => {
+          const option = document.createElement('option');
+          option.value = opt;
+          option.textContent = opt;
+          select.appendChild(option);
+        });
+
+        row.appendChild(left);
+        row.appendChild(select);
+        grid.appendChild(row);
+      });
+
+      optionsEl.appendChild(grid);
+    }
+
+    function renderDragDrop(q) {
+      const hint = document.createElement('p');
+      hint.className = 'hint';
+      hint.textContent = 'Drag items to reorder them from first step to last.';
+      optionsEl.appendChild(hint);
+
+      dragOrder = shuffled(q.items);
+
+      const list = document.createElement('ul');
+      list.className = 'drag-list';
+      list.id = 'dragList';
+      optionsEl.appendChild(list);
+      drawDragItems();
+    }
+
+    function drawDragItems() {
+      const list = document.getElementById('dragList');
+      if (!list) return;
+      list.innerHTML = '';
+
+      dragOrder.forEach((itemText, index) => {
+        const li = document.createElement('li');
+        li.className = 'drag-item';
+        li.draggable = true;
+        li.dataset.index = String(index);
+        li.textContent = `${index + 1}. ${itemText}`;
+
+        li.addEventListener('dragstart', () => {
+          draggingIndex = index;
+          li.classList.add('dragging');
+        });
+
+        li.addEventListener('dragend', () => {
+          li.classList.remove('dragging');
+          draggingIndex = null;
+          document.querySelectorAll('.drag-item.over').forEach((el) => el.classList.remove('over'));
+        });
+
+        li.addEventListener('dragover', (event) => {
+          event.preventDefault();
+          li.classList.add('over');
+        });
+
+        li.addEventListener('dragleave', () => {
+          li.classList.remove('over');
+        });
+
+        li.addEventListener('drop', (event) => {
+          event.preventDefault();
+          li.classList.remove('over');
+          const targetIndex = Number(li.dataset.index);
+          if (draggingIndex === null || targetIndex === draggingIndex) return;
+          const moved = dragOrder.splice(draggingIndex, 1)[0];
+          dragOrder.splice(targetIndex, 0, moved);
+          drawDragItems();
+        });
+
+        list.appendChild(li);
+      });
+    }
+
+    function renderQuestion() {
+      const q = questions[current];
+      meta.textContent = `Question ${current + 1} / ${questions.length}`;
+      progress.style.width = `${((current + 1) / questions.length) * 100}%`;
+      questionEl.textContent = q.question;
+      optionsEl.innerHTML = '';
+      feedbackEl.className = 'feedback';
+      feedbackEl.textContent = '';
+      submitBtn.disabled = false;
+      nextBtn.disabled = true;
+      locked = false;
+
+      if (q.type === 'matching') {
+        renderMatching(q);
+      } else if (q.type === 'dragdrop') {
+        renderDragDrop(q);
+      } else {
+        renderMcqOrTf(q);
+      }
+    }
+
+    function gradeQuestion(q) {
+      if (q.type === 'mcq') {
+        const checked = document.querySelector('input[name="answer"]:checked');
+        if (!checked) return { answered: false };
+        const choice = Number(checked.value);
+        return { answered: true, correct: choice === q.answer, correctText: q.options[q.answer] };
+      }
+
+      if (q.type === 'tf') {
+        const checked = document.querySelector('input[name="answer"]:checked');
+        if (!checked) return { answered: false };
+        const choice = Number(checked.value) === 0;
+        const correctText = q.answer ? 'True' : 'False';
+        return { answered: true, correct: choice === q.answer, correctText };
+      }
+
+      if (q.type === 'matching') {
+        const selects = Array.from(optionsEl.querySelectorAll('select[data-left]'));
+        if (selects.some((sel) => !sel.value)) return { answered: false };
+        const correct = selects.every((sel) => q.answerMap[sel.dataset.left] === sel.value);
+        return { answered: true, correct, correctText: 'all matches aligned' };
+      }
+
+      if (q.type === 'dragdrop') {
+        const correct = q.correctOrder.every((step, index) => dragOrder[index] === step);
+        return { answered: true, correct, correctText: q.correctOrder.join(' → ') };
+      }
+
+      return { answered: false };
+    }
+
+    submitBtn.addEventListener('click', () => {
+      if (locked) return;
+
+      const q = questions[current];
+      const result = gradeQuestion(q);
+
+      if (!result.answered) {
+        feedbackEl.className = 'feedback bad';
+        feedbackEl.textContent = 'Complete this question before checking your answer.';
+        return;
+      }
+
+      locked = true;
+      submitBtn.disabled = true;
+      nextBtn.disabled = false;
+
+      if (result.correct) {
+        score += 1;
+        feedbackEl.className = 'feedback ok';
+        feedbackEl.textContent = `✅ Correct. ${q.explanation}`;
+      } else {
+        feedbackEl.className = 'feedback bad';
+        feedbackEl.textContent = `❌ Not quite. Correct answer: ${result.correctText}. Why: ${q.explanation}`;
+      }
+    });
+
+    nextBtn.addEventListener('click', () => {
+      if (!locked) return;
+      current += 1;
+
+      if (current >= questions.length) {
+        quizSection.style.display = 'none';
+        resultSection.style.display = 'block';
+
+        const pct = Math.round((score / questions.length) * 100);
+        resultTitle.textContent = `You scored ${score} / ${questions.length} (${pct}%)`;
+
+        if (pct >= 85) {
+          resultText.textContent = 'Strong run. You are close to pit-ready electrical recall.';
+        } else if (pct >= 65) {
+          resultText.textContent = 'Solid start. Review the explanations on missed questions and retry.';
+        } else {
+          resultText.textContent = 'Keep practicing. Focus on battery thresholds, wire gauges, and CAN details.';
+        }
+        return;
+      }
+
+      renderQuestion();
+    });
+
+    restartBtn.addEventListener('click', () => {
+      current = 0;
+      score = 0;
+      resultSection.style.display = 'none';
+      quizSection.style.display = 'block';
+      renderQuestion();
+    });
+
+    renderQuestion();
+  </script>
 </body>
 </html>

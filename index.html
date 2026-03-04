@@ -240,6 +240,160 @@
       border-color: #93c5fd;
       background: #eff6ff;
     }
+
+    .drag-category-container {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 2fr);
+      gap: 16px;
+      margin-bottom: 18px;
+      align-items: flex-start;
+    }
+
+    .item-pool {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      background: #f9fafb;
+    }
+
+    .item-pool h3 {
+      margin: 0 0 8px;
+      font-size: 0.95rem;
+      color: var(--muted);
+    }
+
+    .drag-item-cat {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px 10px;
+      background: #fff;
+      cursor: grab;
+      user-select: none;
+      font-size: 0.9rem;
+      margin-bottom: 6px;
+    }
+
+    .drag-item-cat.dragging {
+      opacity: 0.5;
+    }
+
+    .categories {
+      display: grid;
+      gap: 10px;
+    }
+
+    .category-box {
+      border: 1px dashed #cbd5f5;
+      border-radius: 12px;
+      padding: 10px 10px 6px;
+      min-height: 72px;
+      background: #f9fafb;
+    }
+
+    .category-box h4 {
+      margin: 0 0 6px;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    .category-box.over {
+      border-style: solid;
+      border-color: #60a5fa;
+      background: #eff6ff;
+    }
+
+    .multimeter {
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      padding: 14px;
+      background: #f9fafb;
+      margin-bottom: 18px;
+    }
+
+    .dial {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .dial-option {
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #fff;
+      font-size: 0.88rem;
+      cursor: pointer;
+    }
+
+    .dial-option.selected {
+      border-color: #2563eb;
+      background: #dbeafe;
+      color: #1e3a8a;
+    }
+
+    .main-layout {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 20px;
+      align-items: flex-start;
+    }
+
+    .main-content {
+      min-width: 0;
+    }
+
+    .sidebar {
+      width: 80px;
+      border-right: 1px solid var(--border);
+      padding-right: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .sidebar-title {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .sidebar-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 6px;
+    }
+
+    .sidebar-btn {
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #f9fafb;
+      font-size: 0.8rem;
+      padding: 4px 0;
+      cursor: pointer;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .sidebar-btn.active {
+      border-color: #2563eb;
+      background: #dbeafe;
+      color: #1e3a8a;
+      font-weight: 600;
+    }
+
+    .sidebar-btn.answered-correct {
+      border-color: #16a34a;
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .sidebar-btn.answered-wrong {
+      border-color: #b91c1c;
+      background: #fee2e2;
+      color: #7f1d1d;
+    }
   </style>
 </head>
 <body>
@@ -253,24 +407,30 @@
       <div class="progress" id="progress"></div>
     </div>
 
-    <section id="quizSection">
-      <div class="question" id="question"></div>
-      <div class="options" id="options"></div>
-      <div class="feedback" id="feedback"></div>
-x
-      <div class="actions">
-        <button class="primary" id="submitBtn">Check Answer</button>
-        <button class="secondary" id="nextBtn" disabled>Next</button>
-      </div>
-    </section>
+    <div class="main-layout">
+      <aside class="sidebar" id="sidebar"></aside>
 
-    <section class="result" id="resultSection">
-      <h2 id="resultTitle"></h2>
-      <p class="small" id="resultText"></p>
-      <div class="actions" style="margin-top: 12px;">
-        <button class="primary" id="restartBtn">Practice Again</button>
+      <div class="main-content">
+        <section id="quizSection">
+          <div class="question" id="question"></div>
+          <div class="options" id="options"></div>
+          <div class="feedback" id="feedback"></div>
+
+          <div class="actions">
+            <button class="primary" id="submitBtn">Check Answer</button>
+            <button class="secondary" id="nextBtn" disabled>Next</button>
+          </div>
+        </section>
+
+        <section class="result" id="resultSection">
+          <h2 id="resultTitle"></h2>
+          <p class="small" id="resultText"></p>
+          <div class="actions" style="margin-top: 12px;">
+            <button class="primary" id="restartBtn">Practice Again</button>
+          </div>
+        </section>
       </div>
-    </section>
+    </div>
   </main>
 
   <script>
@@ -439,6 +599,63 @@ x
         items: ['Strip wire to contact crimp length', 'Crimp contact onto stripped wire', 'Slide contact into housing', 'Pull test'],
         correctOrder: ['Strip wire to contact crimp length', 'Crimp contact onto stripped wire', 'Slide contact into housing', 'Pull test'],
         explanation: 'Correct order is prep wire, crimp, insert into housing, then verify with pull test.'
+      },
+      {
+        type: 'checkbox',
+        question: 'What sensors can be found on the robot?',
+        options: [
+          'Pigeon 2.0',
+          'Limit Switch',
+          'NavX-MXP',
+          'Color Sensor V3',
+          'Ultrasonic Sensor',
+          'CANcoder (Encoder)',
+          'Beam-break Sensor',
+          'TalonFX',
+          'Limelight'
+        ],
+        answer: [0, 1, 5, 6, 7],
+        explanation: 'The correct sensors are CANcoder, TalonFX, Limelight, Pigeon 2.0, and Limit Switch. The others are valid FRC sensors but not on this specific robot.'
+      },
+      {
+        type: 'mcq',
+        question: 'What does the robot status light plug into?',
+        options: [
+          'The RSL port on the RoboRio',
+          'A DIO port on the RoboRio',
+          'The VRM',
+          'The PDH'
+        ],
+        answer: 0,
+        explanation: 'The Robot Signal Light (RSL) plugs into the dedicated RSL port on the RoboRio.'
+      },
+      {
+        type: 'dragdrop-category',
+        question: '(excluding the drivetrain) How many motors does each subsystem have? Motor types?',
+        categories: ['Hopper/Intake', 'Climb', 'Indexer/Shooter'],
+        items: [
+          'Falcon 500', 'Falcon 500', 'Falcon 500', 'Falcon 500', 'Falcon 500', 'Kraken x44', 'Kraken x60', 'Kraken x60'
+        ],
+        answer: {
+          'Hopper/Intake': { 'Falcon 500': 3, 'Kraken x44': 0, 'Kraken x60': 0 },
+          'Climb': { 'Falcon 500': 1, 'Kraken x44': 0, 'Kraken x60': 0 },
+          'Indexer/Shooter': { 'Falcon 500': 1, 'Kraken x44': 1, 'Kraken x60': 2 }
+        },
+        explanation: 'Hopper/Intake has 3 Falcon 500s. The Climb has 1 Falcon 500. The Indexer/Shooter has 1 Kraken x44, 2 Kraken x60s, and 1 Falcon 500.'
+      },
+      {
+        type: 'mcq',
+        question: 'A. The team suspects there’s a short on the robot that is causing the chassis to be energized. What tool would you use to check the voltage of the chassis?',
+        options: ['Multimeter', 'Wrench', 'Battery Beak', 'Spool of wire'],
+        answer: 0,
+        explanation: 'A multimeter is used to measure voltage.'
+      },
+      {
+        type: 'interactive-multimeter',
+        question: 'B. What setting would you select on the tool?',
+        options: ['200V', '2V', '20V', '20mA', '2A'],
+        answer: '20V',
+        explanation: 'DC 20V will be the correct range for a potential 12V short.'
       }
     ];
 
@@ -447,6 +664,7 @@ x
     let locked = false;
     let dragOrder = [];
     let draggingIndex = null;
+    let draggingElement = null;
 
     const meta = document.getElementById('meta');
     const progress = document.getElementById('progress');
@@ -460,6 +678,9 @@ x
     const resultText = document.getElementById('resultText');
     const restartBtn = document.getElementById('restartBtn');
     const quizSection = document.getElementById('quizSection');
+    const sidebarEl = document.getElementById('sidebar');
+
+    const questionResults = Array(questions.length).fill(null);
 
     function shuffled(arr) {
       const copy = [...arr];
@@ -470,6 +691,50 @@ x
       return copy;
     }
 
+    function buildSidebar() {
+      if (!sidebarEl) return;
+      sidebarEl.innerHTML = '';
+
+      const title = document.createElement('div');
+      title.className = 'sidebar-title';
+      title.textContent = 'Questions';
+      sidebarEl.appendChild(title);
+
+      const list = document.createElement('div');
+      list.className = 'sidebar-list';
+
+      questions.forEach((_, index) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'sidebar-btn';
+        btn.textContent = String(index + 1);
+        btn.dataset.index = String(index);
+        btn.addEventListener('click', () => {
+          current = index;
+          renderQuestion();
+        });
+        list.appendChild(btn);
+      });
+
+      sidebarEl.appendChild(list);
+    }
+
+    function updateSidebar() {
+      if (!sidebarEl) return;
+      const buttons = sidebarEl.querySelectorAll('.sidebar-btn');
+      buttons.forEach((btn) => {
+        const idx = Number(btn.dataset.index);
+        btn.classList.toggle('active', idx === current);
+
+        btn.classList.remove('answered-correct', 'answered-wrong');
+        if (questionResults[idx] === true) {
+          btn.classList.add('answered-correct');
+        } else if (questionResults[idx] === false) {
+          btn.classList.add('answered-wrong');
+        }
+      });
+    }
+
     function renderMcqOrTf(q) {
       const isTf = q.type === 'tf';
       const choices = isTf ? ['True', 'False'] : q.options;
@@ -478,12 +743,57 @@ x
       hint.textContent = isTf ? 'Choose True or False.' : 'Choose one answer.';
       optionsEl.appendChild(hint);
 
-      choices.forEach((optionText, index) => {
+      if (isTf) {
+        choices.forEach((optionText, index) => {
+          const label = document.createElement('label');
+          label.className = 'option';
+
+          const input = document.createElement('input');
+          input.type = 'radio';
+          input.name = 'answer';
+          input.value = String(index); // 0 = True, 1 = False
+
+          const span = document.createElement('span');
+          span.textContent = optionText;
+
+          label.appendChild(input);
+          label.appendChild(span);
+          optionsEl.appendChild(label);
+        });
+      } else {
+        const indices = shuffled(choices.map((_, i) => i));
+        indices.forEach((originalIndex) => {
+          const label = document.createElement('label');
+          label.className = 'option';
+
+          const input = document.createElement('input');
+          input.type = 'radio';
+          input.name = 'answer';
+          // store original index so grading works after shuffle
+          input.value = String(originalIndex);
+
+          const span = document.createElement('span');
+          span.textContent = choices[originalIndex];
+
+          label.appendChild(input);
+          label.appendChild(span);
+          optionsEl.appendChild(label);
+        });
+      }
+    }
+
+    function renderCheckbox(q) {
+      const hint = document.createElement('p');
+      hint.className = 'hint';
+      hint.textContent = 'Select all that apply.';
+      optionsEl.appendChild(hint);
+
+      q.options.forEach((optionText, index) => {
         const label = document.createElement('label');
         label.className = 'option';
 
         const input = document.createElement('input');
-        input.type = 'radio';
+        input.type = 'checkbox';
         input.name = 'answer';
         input.value = String(index);
 
@@ -550,6 +860,106 @@ x
       drawDragItems();
     }
 
+    function renderDragDropCategory(q) {
+        const hint = document.createElement('p');
+        hint.className = 'hint';
+        hint.textContent = 'Drag the motors into the correct subsystem category.';
+        optionsEl.appendChild(hint);
+
+        const container = document.createElement('div');
+        container.className = 'drag-category-container';
+
+        const itemPool = document.createElement('div');
+        itemPool.className = 'item-pool';
+        itemPool.innerHTML = '<h3>Motors</h3>';
+        shuffled(q.items).forEach(item => {
+          const el = document.createElement('div');
+          el.className = 'drag-item-cat';
+          el.textContent = item;
+          el.draggable = true;
+          el.addEventListener('dragstart', (e) => {
+            draggingElement = el;
+            el.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+          });
+          el.addEventListener('dragend', () => {
+            if (draggingElement === el) draggingElement = null;
+            el.classList.remove('dragging');
+          });
+          itemPool.appendChild(el);
+        });
+
+        const categoriesContainer = document.createElement('div');
+        categoriesContainer.className = 'categories';
+
+        q.categories.forEach(cat => {
+            const catEl = document.createElement('div');
+            catEl.className = 'category-box';
+            catEl.innerHTML = `<h4>${cat}</h4>`;
+            catEl.dataset.category = cat;
+
+            catEl.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                catEl.classList.add('over');
+            });
+            catEl.addEventListener('dragleave', () => {
+                catEl.classList.remove('over');
+            });
+            catEl.addEventListener('drop', (e) => {
+                e.preventDefault();
+                catEl.classList.remove('over');
+                if (draggingElement) {
+                    catEl.appendChild(draggingElement);
+                }
+            });
+            categoriesContainer.appendChild(catEl);
+        });
+
+        itemPool.addEventListener('dragover', (e) => {
+          e.preventDefault();
+        });
+
+        itemPool.addEventListener('drop', (e) => {
+          e.preventDefault();
+          if (draggingElement) {
+            itemPool.appendChild(draggingElement);
+          }
+        });
+
+        container.appendChild(itemPool);
+        container.appendChild(categoriesContainer);
+        optionsEl.appendChild(container);
+    }
+
+    function renderInteractiveMultimeter(q) {
+        const hint = document.createElement('p');
+        hint.className = 'hint';
+        hint.textContent = 'Click on the correct setting on the multimeter dial.';
+        optionsEl.appendChild(hint);
+
+        const multimeterContainer = document.createElement('div');
+        multimeterContainer.className = 'multimeter';
+        // This would be a simplified representation. A real implementation might use SVG.
+        const dial = document.createElement('div');
+        dial.className = 'dial';
+        
+        q.options.forEach(opt => {
+            const optEl = document.createElement('div');
+            optEl.className = 'dial-option';
+            optEl.textContent = opt;
+            optEl.dataset.value = opt;
+            optEl.addEventListener('click', () => {
+                if (locked) return;
+                document.querySelectorAll('.dial-option').forEach(el => el.classList.remove('selected'));
+                optEl.classList.add('selected');
+            });
+            dial.appendChild(optEl);
+        });
+
+        multimeterContainer.appendChild(dial);
+        optionsEl.appendChild(multimeterContainer);
+    }
+
     function drawDragItems() {
       const list = document.getElementById('dragList');
       if (!list) return;
@@ -612,9 +1022,17 @@ x
         renderMatching(q);
       } else if (q.type === 'dragdrop') {
         renderDragDrop(q);
+      } else if (q.type === 'checkbox') {
+        renderCheckbox(q);
+      } else if (q.type === 'dragdrop-category') {
+        renderDragDropCategory(q);
+      } else if (q.type === 'interactive-multimeter') {
+        renderInteractiveMultimeter(q);
       } else {
         renderMcqOrTf(q);
       }
+
+      updateSidebar();
     }
 
     function gradeQuestion(q) {
@@ -633,6 +1051,14 @@ x
         return { answered: true, correct: choice === q.answer, correctText };
       }
 
+      if (q.type === 'checkbox') {
+        const checked = Array.from(document.querySelectorAll('input[name="answer"]:checked')).map(el => Number(el.value));
+        if (checked.length === 0) return { answered: false };
+        const correct = q.answer.every(val => checked.includes(val)) && q.answer.length === checked.length;
+        const correctText = q.options.filter((_, i) => q.answer.includes(i)).join(', ');
+        return { answered: true, correct, correctText };
+      }
+
       if (q.type === 'matching') {
         const selects = Array.from(optionsEl.querySelectorAll('select[data-left]'));
         if (selects.some((sel) => !sel.value)) return { answered: false };
@@ -643,6 +1069,50 @@ x
       if (q.type === 'dragdrop') {
         const correct = q.correctOrder.every((step, index) => dragOrder[index] === step);
         return { answered: true, correct, correctText: q.correctOrder.join(' → ') };
+      }
+
+      if (q.type === 'dragdrop-category') {
+        const categoryBoxes = optionsEl.querySelectorAll('.category-box');
+        let allCorrect = true;
+
+        for (const box of categoryBoxes) {
+          const category = box.dataset.category;
+          const requirement = q.answer[category];
+          if (!requirement) {
+            allCorrect = false;
+            break;
+          }
+
+          const items = Array.from(box.querySelectorAll('.drag-item-cat')).map(el => el.textContent.trim());
+          const counts = {};
+          items.forEach((label) => {
+            counts[label] = (counts[label] || 0) + 1;
+          });
+
+          const requiredTotal = Object.values(requirement).reduce((sum, n) => sum + n, 0);
+          if (items.length !== requiredTotal) {
+            allCorrect = false;
+            break;
+          }
+
+          for (const [label, needed] of Object.entries(requirement)) {
+            if ((counts[label] || 0) !== needed) {
+              allCorrect = false;
+              break;
+            }
+          }
+
+          if (!allCorrect) break;
+        }
+
+        return { answered: true, correct: allCorrect, correctText: 'Motors correctly categorized.' };
+      }
+
+      if (q.type === 'interactive-multimeter') {
+        const selected = document.querySelector('.dial-option.selected');
+        if (!selected) return { answered: false };
+        const value = selected.dataset.value;
+        return { answered: true, correct: value === q.answer, correctText: q.answer };
       }
 
       return { answered: false };
@@ -664,6 +1134,9 @@ x
       submitBtn.disabled = true;
       nextBtn.disabled = false;
 
+      questionResults[current] = result.correct;
+      updateSidebar();
+
       if (result.correct) {
         score += 1;
         feedbackEl.className = 'feedback ok';
@@ -671,6 +1144,37 @@ x
       } else {
         feedbackEl.className = 'feedback bad';
         feedbackEl.textContent = `❌ Not quite. Correct answer: ${result.correctText}. Why: ${q.explanation}`;
+        if (q.type === 'mcq' || q.type === 'tf') {
+          const options = optionsEl.querySelectorAll('.option');
+          options.forEach((label) => {
+            const input = label.querySelector('input');
+            if (!input) return;
+
+            if (q.type === 'mcq') {
+              if (Number(input.value) === q.answer) {
+                label.style.background = '#dcfce7';
+                label.style.borderColor = '#4ade80';
+              }
+            } else if (q.type === 'tf') {
+              const isTrueLabel = Number(input.value) === 0;
+              const shouldHighlight = (q.answer === true && isTrueLabel) || (q.answer === false && !isTrueLabel);
+              if (shouldHighlight) {
+                label.style.background = '#dcfce7';
+                label.style.borderColor = '#4ade80';
+              }
+            }
+          });
+        } else if (q.type === 'checkbox') {
+          const options = optionsEl.querySelectorAll('.option');
+          options.forEach((label) => {
+            const input = label.querySelector('input');
+            if (!input) return;
+            if (q.answer.includes(Number(input.value))) {
+              label.style.background = '#dcfce7';
+              label.style.borderColor = '#4ade80';
+            }
+          });
+        }
       }
     });
 
@@ -681,7 +1185,7 @@ x
       if (current >= questions.length) {
         quizSection.style.display = 'none';
         resultSection.style.display = 'block';
-
+        score = questionResults.filter((v) => v === true).length;
         const pct = Math.round((score / questions.length) * 100);
         resultTitle.textContent = `You scored ${score} / ${questions.length} (${pct}%)`;
 
@@ -706,6 +1210,7 @@ x
       renderQuestion();
     });
 
+    buildSidebar();
     renderQuestion();
   </script>
 </body>

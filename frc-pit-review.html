@@ -1,0 +1,1557 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Pit Programmer Test Practice</title>
+	<style>
+		:root {
+			--bg: #f6f8fb;
+			--card: #ffffff;
+			--text: #1f2937;
+			--muted: #6b7280;
+			--accent: #2563eb;
+			--accent-hover: #1d4ed8;
+			--success: #047857;
+			--error: #b91c1c;
+			--border: #e5e7eb;
+		}
+
+		* { box-sizing: border-box; }
+
+		body {
+			margin: 0;
+			font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+			background: var(--bg);
+			color: var(--text);
+			min-height: 100vh;
+			display: grid;
+			place-items: center;
+			padding: 24px;
+		}
+
+		.app {
+			width: 100%;
+			max-width: 860px;
+			background: var(--card);
+			border: 1px solid var(--border);
+			border-radius: 16px;
+			padding: 24px;
+			box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+		}
+
+		.top {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			gap: 12px;
+			margin-bottom: 16px;
+			flex-wrap: wrap;
+		}
+
+		h1 {
+			margin: 0;
+			font-size: 1.45rem;
+			letter-spacing: 0.2px;
+		}
+
+		.meta {
+			color: var(--muted);
+			font-size: 0.95rem;
+			font-weight: 600;
+		}
+
+		.progress-wrap {
+			width: 100%;
+			height: 10px;
+			border-radius: 999px;
+			background: #eef2ff;
+			overflow: hidden;
+			margin: 10px 0 18px;
+		}
+
+		.progress {
+			height: 100%;
+			width: 0%;
+			background: linear-gradient(90deg, #60a5fa, #2563eb);
+			transition: width 220ms ease;
+		}
+
+		.question {
+			font-size: 1.14rem;
+			line-height: 1.45;
+			margin-bottom: 14px;
+			font-weight: 650;
+		}
+
+		.options {
+			display: grid;
+			gap: 10px;
+			margin-bottom: 18px;
+		}
+
+		.option {
+			display: flex;
+			gap: 10px;
+			align-items: flex-start;
+			border: 1px solid var(--border);
+			border-radius: 12px;
+			padding: 12px 13px;
+			cursor: pointer;
+			transition: border-color 140ms ease, background 140ms ease;
+		}
+
+		.option:hover {
+			border-color: #c7d2fe;
+			background: #f8faff;
+		}
+
+		.option input { margin-top: 2px; }
+
+		.feedback {
+			border-radius: 12px;
+			padding: 12px 13px;
+			margin-bottom: 16px;
+			display: none;
+			line-height: 1.5;
+			font-size: 0.97rem;
+		}
+
+		.feedback.ok {
+			display: block;
+			background: #ecfdf5;
+			border: 1px solid #a7f3d0;
+			color: var(--success);
+		}
+
+		.feedback.bad {
+			display: block;
+			background: #fef2f2;
+			border: 1px solid #fecaca;
+			color: var(--error);
+		}
+
+		.actions {
+			display: flex;
+			gap: 10px;
+			flex-wrap: wrap;
+		}
+
+		button {
+			border: 0;
+			border-radius: 10px;
+			padding: 10px 14px;
+			font-size: 0.95rem;
+			font-weight: 650;
+			cursor: pointer;
+		}
+
+		.primary {
+			background: var(--accent);
+			color: #fff;
+		}
+
+		.primary:hover { background: var(--accent-hover); }
+
+		.secondary {
+			background: #eef2ff;
+			color: #1e3a8a;
+		}
+
+		.secondary:hover { background: #e0e7ff; }
+
+		.restart-mid {
+			background: #b91c1c;
+			color: #fff;
+			margin-left: auto;
+		}
+
+		.restart-mid:hover {
+			background: #991b1b;
+		}
+
+		.secondary:disabled, .primary:disabled {
+			opacity: 0.55;
+			cursor: not-allowed;
+		}
+
+		.result {
+			display: none;
+			margin-top: 8px;
+			border-top: 1px solid var(--border);
+			padding-top: 16px;
+		}
+
+		.result h2 {
+			margin: 0 0 8px;
+			font-size: 1.2rem;
+		}
+
+		.small {
+			color: var(--muted);
+			margin: 4px 0 0;
+		}
+
+		.hint {
+			color: var(--muted);
+			font-size: 0.92rem;
+			margin: 0 0 10px;
+		}
+
+		.match-grid {
+			display: grid;
+			gap: 10px;
+			margin-bottom: 18px;
+		}
+
+		.match-row {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 10px;
+			align-items: center;
+			border: 1px solid var(--border);
+			border-radius: 12px;
+			padding: 12px;
+			background: #fff;
+		}
+
+		.match-row select {
+			width: 100%;
+			padding: 8px 10px;
+			border-radius: 8px;
+			border: 1px solid var(--border);
+			font-size: 0.95rem;
+			background: #fff;
+			color: var(--text);
+		}
+
+		.drag-list {
+			list-style: none;
+			margin: 0 0 18px;
+			padding: 0;
+			display: grid;
+			gap: 10px;
+		}
+
+		.drag-item {
+			border: 1px solid var(--border);
+			border-radius: 12px;
+			padding: 12px;
+			background: #fff;
+			cursor: grab;
+			user-select: none;
+		}
+
+		.drag-item.dragging {
+			opacity: 0.45;
+		}
+
+		.drag-item.over {
+			border-color: #93c5fd;
+			background: #eff6ff;
+		}
+
+		.drag-category-container {
+			display: grid;
+			grid-template-columns: minmax(0, 1.2fr) minmax(0, 2fr);
+			gap: 16px;
+			margin-bottom: 18px;
+			align-items: flex-start;
+		}
+
+		.drag-category-container.vertical {
+			grid-template-columns: minmax(0, 1fr);
+		}
+
+		.item-pool {
+			border: 1px solid var(--border);
+			border-radius: 12px;
+			padding: 12px;
+			background: #f9fafb;
+			display: grid;
+			grid-template-columns: repeat(4, minmax(0, 1fr));
+			gap: 8px;
+		}
+
+		.item-pool h3 {
+			margin: 0 0 8px;
+			font-size: 0.95rem;
+			color: var(--muted);
+		}
+
+		.drag-item-cat {
+			border: 1px solid var(--border);
+			border-radius: 10px;
+			padding: 6px 8px;
+			background: #fff;
+			cursor: grab;
+			user-select: none;
+			font-size: 0.85rem;
+			margin: 0;
+			text-align: center;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+
+		.drag-item-cat.dragging {
+			opacity: 0.5;
+		}
+
+		.categories {
+			display: grid;
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			gap: 8px;
+		}
+
+		.category-box {
+			border: 1px dashed #cbd5f5;
+			border-radius: 12px;
+			padding: 8px 8px 4px;
+			min-height: 56px;
+			background: #f9fafb;
+		}
+
+		.category-box h4 {
+			margin: 0 0 4px;
+			font-size: 0.82rem;
+			color: var(--muted);
+		}
+
+		.category-box.over {
+			border-style: solid;
+			border-color: #60a5fa;
+			background: #eff6ff;
+		}
+
+		.multimeter {
+			border-radius: 12px;
+			border: 1px solid var(--border);
+			padding: 14px;
+			background: #f9fafb;
+			margin-bottom: 18px;
+		}
+
+		.dial {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 8px;
+		}
+
+		.dial-option {
+			padding: 8px 10px;
+			border-radius: 999px;
+			border: 1px solid var(--border);
+			background: #fff;
+			font-size: 0.88rem;
+			cursor: pointer;
+		}
+
+		.dial-option.selected {
+			border-color: #2563eb;
+			background: #dbeafe;
+			color: #1e3a8a;
+		}
+
+		.main-layout {
+			display: grid;
+			grid-template-columns: auto minmax(0, 1fr);
+			gap: 20px;
+			align-items: flex-start;
+		}
+
+		.main-content {
+			min-width: 0;
+		}
+
+		.sidebar {
+			width: 80px;
+			border-right: 1px solid var(--border);
+			padding-right: 12px;
+			display: flex;
+			flex-direction: column;
+			gap: 8px;
+		}
+
+		.sidebar-title {
+			font-size: 0.8rem;
+			font-weight: 600;
+			color: var(--muted);
+			text-transform: uppercase;
+			letter-spacing: 0.04em;
+		}
+
+		.sidebar-list {
+			display: grid;
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			gap: 6px;
+		}
+
+		.sidebar-btn {
+			border-radius: 999px;
+			border: 1px solid var(--border);
+			background: #f9fafb;
+			font-size: 0.8rem;
+			padding: 4px 0;
+			cursor: pointer;
+			text-align: center;
+			color: var(--muted);
+		}
+
+		.sidebar-btn.active {
+			border-color: #2563eb;
+			background: #dbeafe;
+			color: #1e3a8a;
+			font-weight: 600;
+		}
+
+		.sidebar-btn.answered-correct {
+			border-color: #16a34a;
+			background: #dcfce7;
+			color: #166534;
+		}
+
+		.sidebar-btn.answered-wrong {
+			border-color: #b91c1c;
+			background: #fee2e2;
+			color: #7f1d1d;
+		}
+	</style>
+</head>
+<body>
+	<main class="app">
+		<div class="top">
+			<h1>Pit Programmer Test Practice</h1>
+			<div class="meta" id="meta">Question 1 / 1</div>
+		</div>
+
+		<div class="progress-wrap" aria-hidden="true">
+			<div class="progress" id="progress"></div>
+		</div>
+
+		<div class="main-layout">
+			<aside class="sidebar" id="sidebar"></aside>
+
+			<div class="main-content">
+				<section id="quizSection">
+					<div class="question" id="question"></div>
+					<div class="options" id="options"></div>
+					<div class="feedback" id="feedback"></div>
+
+					<div class="actions">
+						<button class="primary" id="submitBtn">Check Answer</button>
+						<button class="secondary" id="nextBtn" disabled>Next</button>
+						<button class="secondary restart-mid" id="restartMidBtn" style="display: none;">Restart Question</button>
+					</div>
+				</section>
+
+				<section class="result" id="resultSection">
+					<h2 id="resultTitle"></h2>
+					<p class="small" id="resultText"></p>
+					<div class="actions" style="margin-top: 12px;">
+						<button class="primary" id="restartBtn">Practice Again</button>
+					</div>
+				</section>
+			</div>
+		</div>
+	</main>
+
+	<script>
+		const questions = [
+			{
+				type: 'mcq',
+				question: 'Which programming language does the team use for robot code?',
+				options: [
+					'Python, using a custom FRC library built in-house',
+					'C++, following an older codebase that was never migrated',
+					'Java, using the standard WPILib command-based framework the team maintains',
+					'Rust, via an experimental toolchain still under evaluation'
+				],
+				answer: 2,
+				explanation: 'The team writes its robot code in Java.'
+			},
+			{
+				type: 'mcq',
+				question: 'What is the CommandScheduler in WPILib?',
+				options: [
+					'A tool for tuning PID constants only during autonomous, not during teleop',
+					'A built-in class that manages and runs scheduled commands every loop, removing them when isFinished() returns true',
+					'A graphical desktop utility used exclusively for deploying code to the robot',
+					'A logging system that simply records robot data without affecting command flow'
+				],
+				answer: 1,
+				explanation: 'CommandScheduler is a built-in class that keeps a list of active commands, calls their execute() methods every loop, and removes them when isFinished() returns true.'
+			},
+			{
+				type: 'dragdrop-category',
+				question: 'Drag the main autonomous steps into the correct Step 1, Step 2, and Step 3 boxes. Extra options are decoys.',
+				categories: [
+					'Step 1',
+					'Step 2',
+					'Step 3'
+				],
+				items: [
+					'Score the 8 preloaded fuel into the goal',
+					'Drive across to the neutral zone and intake additional fuel',
+					'Return across the field line to the alliance zone before auto ends',
+					'Drive onto the charge station and try to balance',
+					'Stay completely still for the entire autonomous period',
+					'Only cross the starting line once and then stop in the neutral zone'
+				],
+				answer: {
+					'Step 1': { 'Score the 8 preloaded fuel into the goal': 1 },
+					'Step 2': { 'Drive across to the neutral zone and intake additional fuel': 1 },
+					'Step 3': { 'Return across the field line to the alliance zone before auto ends': 1 }
+				},
+				explanation: 'Step 1: score the 8 preloaded fuel. Step 2: cross over and intake from the neutral zone. Step 3: cross back into the alliance zone before auto ends.'
+			},
+			{
+				type: 'checkbox',
+				question: 'Which sensors/electronics are involved in shooter/intake/climb feedback according to our setup?',
+				options: [
+					'Motor encoder on intake pivot',
+					'Motor encoder on climb',
+					'Motor encoder on shooter hood',
+					'Pigeon 2.0 IMU',
+					'Limelight',
+					'Ultrasonic range finder'
+				],
+				answer: [0, 1, 2, 3, 4],
+				explanation: 'We use motor encoders on the intake pivot, climb, and shooter hood, plus a Pigeon 2.0 for odometry and a Limelight for localization.'
+			},
+			{
+				type: 'mcq',
+				question: 'What tool do we primarily use to write robot code?',
+				options: [
+					'Notepad++ with FRC plugins and manual command-line build scripts',
+					'Eclipse with legacy FRC plugins from several years ago',
+					'A VS Code distribution preconfigured with WPILib and FRC tools that we install each season',
+					'A generic web-based IDE that is not tailored to FRC development'
+				],
+				answer: 2,
+				explanation: 'We use a version of VS Code that is preconfigured with WPILib and all tools needed to work with robot code.'
+			},
+			{
+				type: 'mcq',
+				question: 'What is Git and why do we use it?',
+				options: [
+					'A graphics editor used to design dashboard layouts and custom icons',
+					'A version control system that lets multiple programmers collaborate, track changes, and sync local code with a shared remote repo',
+					'A logging system for driver station data that stores match results only',
+					'A small command-line tool used only once a year to download WPILib updates'
+				],
+				answer: 1,
+				explanation: 'Git is a version control system that syncs local code with a shared remote repo so multiple programmers can work simultaneously.'
+			},
+			{
+				type: 'matching',
+				question: 'Match each hardware item to its diagnostic/configuration software.',
+				leftItems: [
+					'RoboRIO',
+					'Vivid-Hosting VH-109 radio',
+					'NEO Brushless Motor',
+					'Falcon 500',
+					'NEO 550 Brushless Motor',
+					'Kraken X60',
+					'CANcoder',
+					'Power Distribution Hub (PDH)',
+					'CANivore',
+					'CANdle',
+					'SPARK MAX Motor Controller',
+					'TalonFX Encoder',
+					'Limelight 3'
+				],
+				rightOptions: [
+					'Rio Imaging Tool or http://10.64.79.2',
+					'Radio at http://10.64.79.1',
+					'REV Hardware Client',
+					'Phoenix Tuner X',
+					'Limelight Hardware Manager'
+				],
+				answerMap: {
+					'RoboRIO': 'Rio Imaging Tool or http://10.64.79.2',
+					'Vivid-Hosting VH-109 radio': 'Radio at http://10.64.79.1',
+					'NEO Brushless Motor': 'REV Hardware Client',
+					'Falcon 500': 'Phoenix Tuner X',
+					'NEO 550 Brushless Motor': 'REV Hardware Client',
+					'Kraken X60': 'Phoenix Tuner X',
+					'CANcoder': 'Phoenix Tuner X',
+					'Power Distribution Hub (PDH)': 'REV Hardware Client',
+					'CANivore': 'Phoenix Tuner X',
+					'CANdle': 'Phoenix Tuner X',
+					'SPARK MAX Motor Controller': 'REV Hardware Client',
+					'TalonFX Encoder': 'Phoenix Tuner X',
+					'Limelight 3': 'Limelight Hardware Manager'
+				},
+				explanation: 'Each vendor provides its own config tool: REV Hardware Client for REV devices/PDH, Phoenix Tuner X for CTRE devices, Rio Imaging Tool/10.64.79.2 for the roboRIO, radio UI at 10.64.79.1, and Limelight Hardware Manager for Limelight.'
+			},
+			{
+				type: 'dragdrop-category',
+				question: 'Drag the CAN ID number boxes into the correct hardware/loop combination.',
+				categories: [
+					'RoboRIO – roboRIO loop',
+					'FL Drive – CANivore loop',
+					'FL Angle – CANivore loop',
+					'FR Drive – CANivore loop',
+					'FR Angle – CANivore loop',
+					'BL Drive – CANivore loop',
+					'BL Angle – CANivore loop',
+					'BR Drive – CANivore loop',
+					'BR Angle – CANivore loop',
+					'FL CANcoder – CANivore loop',
+					'FR CANcoder – CANivore loop',
+					'BL CANcoder – CANivore loop',
+					'BR CANcoder – CANivore loop',
+					'Climb Motor – roboRIO loop',
+					'Climb CANcoder – roboRIO loop',
+					'Intake Pivot Motor – roboRIO loop',
+					'Intake Pivot Encoder – roboRIO loop',
+					'Hood Motor – roboRIO loop',
+					'Hood Encoder – roboRIO loop'
+				],
+				items: [
+					'0', '1', '2', '3', '4', '5', '6', '7', '8',
+					'11', '12', '13', '14',
+					'15', '16',
+					'23', '24',
+					'31', '32'
+				],
+				answer: {
+					'RoboRIO – roboRIO loop': { '0': 1 },
+					'FL Drive – CANivore loop': { '1': 1 },
+					'FL Angle – CANivore loop': { '2': 1 },
+					'FR Drive – CANivore loop': { '3': 1 },
+					'FR Angle – CANivore loop': { '4': 1 },
+					'BL Drive – CANivore loop': { '5': 1 },
+					'BL Angle – CANivore loop': { '6': 1 },
+					'BR Drive – CANivore loop': { '7': 1 },
+					'BR Angle – CANivore loop': { '8': 1 },
+					'FL CANcoder – CANivore loop': { '11': 1 },
+					'FR CANcoder – CANivore loop': { '12': 1 },
+					'BL CANcoder – CANivore loop': { '13': 1 },
+					'BR CANcoder – CANivore loop': { '14': 1 },
+					'Climb Motor – roboRIO loop': { '15': 1 },
+					'Climb CANcoder – roboRIO loop': { '16': 1 },
+					'Intake Pivot Motor – roboRIO loop': { '23': 1 },
+					'Intake Pivot Encoder – roboRIO loop': { '24': 1 },
+					'Hood Motor – roboRIO loop': { '31': 1 },
+					'Hood Encoder – roboRIO loop': { '32': 1 }
+				},
+				explanation: 'Each device should have its correct CAN ID number dragged into its hardware/loop box, matching both the ID and which loop (roboRIO or CANivore) it is on.'
+			},
+			{
+				type: 'mcq',
+				question: 'What is the Pigeon 2.0, where is it mounted, and why is it there?',
+				options: [
+					'A motor controller on the climber, for current limiting and remote limit switch input.',
+					'An IMU mounted on top of the roboRIO in the center of the brainpan, used for odometry',
+					'A camera next to the Limelight for driver vision, with no role in robot code',
+					'A power distribution module for the shooter, to monitor current and voltage'
+				],
+				answer: 1,
+				explanation: 'Pigeon 2.0 is an IMU used for odometry, mounted on top of the roboRIO in the center of the brainpan.'
+			},
+			{
+				type: 'mcq',
+				question: 'What is dead reckoning in our robot code and how does it work?',
+				options: [
+					'Only using wheel encoders to estimate distance, without any sensor fusion or pose estimation',
+					'Blending Limelight pose estimates and Pigeon 2.0 odometry, trusting Limelight when it sees a tag and otherwise using Pigeon-based odometry',
+					'A routine that disables all sensors during autonomous, relying on pre-programmed motor outputs',
+					'Using random noise to test filters, without any real sensor fusion or pose estimation'
+				],
+				answer: 1,
+				explanation: 'Dead reckoning blends Limelight pose with Pigeon 2.0 odometry: if the Limelight sees an AprilTag, pose is set from it; otherwise, odometry from the Pigeon is used.'
+			},
+			{
+				type: 'mcq',
+				question: 'Why do we use dead reckoning?',
+				options: [
+					'To avoid using sensors at all, relying solely on pre-programmed motor outputs and hoping for the best',
+					'To intentionally make the robot less accurate for testing, giving us a higher chance of going to worlds.',
+					'To combine sometimes-available but accurate Limelight data with always-available but drifting Pigeon data for better robot pose estimates',
+					'Only to log data to the Driver Station, without any impact on actual robot behavior or performance'
+				],
+				answer: 2,
+				explanation: 'Dead reckoning fuses Limelight (accurate but not always available) with Pigeon 2.0 (always available but can drift) to get a more reliable pose for auto shooting and hub tracking.'
+			},
+			{
+				type: 'tf',
+				question: 'True or False: Changing a SPARK MAX CAN ID in REV Hardware Client is permanent as soon as you click apply.',
+				answer: false,
+				explanation: 'Changes to a SPARK MAX CAN ID are reverted on power cycle unless you press the "Burn Flash" button.'
+			},
+			{
+				type: 'mcq',
+				question: 'CAN IDs are 6 bits wide. What is the largest integer value they can represent?',
+				options: ['31', '63', '127', '255'],
+				answer: 1,
+				explanation: 'A 6-bit integer can represent values 0–63, so the largest value is 63.'
+			},
+			{
+				type: 'mcq',
+				question: 'What does CAN stand for?',
+				options: [
+					'Central Automation Network',
+					'Controller Area Network',
+					'Control and Navigation',
+					'Current Allocation Node'
+				],
+				answer: 1,
+				explanation: 'CAN stands for Controller Area Network.'
+			},
+			{
+				type: 'mcq',
+				question: 'Which Limelight setting can be tuned to improve capture rate (frame rate)?',
+				options: [
+					'Changing only LED brightness, since it is the only setting that affects processing load',
+					'Lowering resolution and/or increasing sensor downscale in Limelight Hardware Manager',
+					'Enabling driver camera mode, which turns off all vision processing and just sends raw video feed',
+					'Turning off network tables, which prevents the Limelight from sending any data to the robot and thus reduces load'
+				],
+				answer: 1,
+				explanation: 'Using Limelight Hardware Manager you can lower the image resolution and adjust Sensor Downscale (1x–3x) to increase capture rate.'
+			},
+			{
+				type: 'mcq',
+				question: 'Which part of the robot helps you quickly identify the "front"?',
+				options: [
+					'The side with the battery and climb',
+					'The only empty side opposite the battery and climb',
+					'Whichever side has the bumper number',
+					'The side with the radio antenna'
+				],
+				answer: 1,
+				explanation: 'The front is the side opposite the battery and climb, which is the only empty side of the robot.'
+			},
+			{
+				type: 'mcq',
+				question: 'Briefly, what is PID control and how do we use it?',
+				options: [
+					'A way to randomize motor speeds, making the robot more unpredictable and thus more likely to win',
+					'A formula that continuously corrects a process variable (like position or speed) toward a target, improving accuracy of things like shooter, hood, and pivots',
+					'A tool for configuring CAN IDs, used in REV Hardware Client and Phoenix Tuner X',
+					'A backup safety system that shuts off the robot, only used in the event of a catastrophic failure and not something we tune or interact with directly'
+				],
+				answer: 1,
+				explanation: 'PID control uses proportional, integral, and derivative terms to continuously adjust motor output so a measured value tracks a target (setpoint). We use it for smoother, more accurate control of mechanisms.'
+			},
+			{
+				type: 'mcq',
+				question: 'What does PID stand for?',
+				options: [
+					'Proportional Integral Derivative',
+					'Parallel Integrated Drive',
+					'Proportional Input Driver',
+					'Process Integration Device'
+				],
+				answer: 0,
+				explanation: 'PID stands for Proportional, Integral, Derivative.'
+			},
+			{
+				type: 'mcq',
+				question: 'Which AprilTag family do we configure the Limelight to detect?',
+				options: ['16h5', '25h9', '36h11', 'Tag16h11'],
+				answer: 2,
+				explanation: 'We configure the Limelight for the 36h11 AprilTag family.'
+			},
+			{
+				type: 'mcq',
+				question: 'In the AprilTag family name 36h11, what do the numbers represent?',
+				options: [
+					'Robot team number and field zone',
+					'Number of border squares and robot height',
+					'36 interior squares in the tag, and h11 meaning up to 11-bit error-correcting code distance',
+					'Field year and event code'
+				],
+				answer: 2,
+				explanation: '36 indicates the number of interior squares; h11 relates to the maximum Hamming distance (error tolerance) so tags are not confused with each other.'
+			},
+			{
+				type: 'mcq',
+				question: 'How do you deploy someone else\'s code updates to the robot?',
+				options: [
+					'Edit code on the robot directly with SSH, since that is the only way to update code without erasing the whole robot image',
+					'Run git fetch and rebase to pull their changes locally, build, then deploy while connected to the robot',
+					'Re-clone the repository every time, since git is too complicated to use for syncing changes',
+					'Only copy Java files via USB drive, since that is the only way to update code on the robot'
+				],
+				answer: 1,
+				explanation: 'You fetch/rebase to update your local repo, build to verify, then deploy while connected to the robot via ethernet or Wi‑Fi.'
+			},
+			{
+				type: 'mcq',
+				question: 'When troubleshooting commands, what does isFinished() do?',
+				options: [
+					'Starts the command scheduler',
+					'Returns true when the command is complete so the scheduler can end it',
+					'Restarts the robot code when false',
+					'Prints debug logs only in simulation'
+				],
+				answer: 1,
+				explanation: 'isFinished() tells the CommandScheduler when a command is done so it can be removed from the schedule.'
+			},
+			{
+				type: 'mcq',
+				question: 'What is abstraction in object-oriented programming?',
+				options: [
+					'Exposing all internals of a class to make debugging easier',
+					'Hiding complexity behind a simpler interface so users do not need to know implementation details',
+					'Copying code between classes, reducing code duplication',
+					'Using only static methods, since they are easier to call without creating objects'
+				],
+				answer: 1,
+				explanation: 'Abstraction hides internal complexity behind a clean interface, making classes easier to use.'
+			},
+			{
+				type: 'mcq',
+				question: 'What is encapsulation?',
+				options: [
+					'Grouping unrelated functions in a single file',
+					'Protecting an object\'s data by controlling access through methods (getters/setters) instead of exposing fields directly',
+					'Only using public fields everywhere',
+					'Running code in parallel threads, since that is the only way to achieve encapsulation'
+				],
+				answer: 1,
+				explanation: 'Encapsulation protects a class\'s internal state and exposes controlled access via getters, setters, and methods.'
+			},
+			{
+				type: 'matching',
+				question: 'Match each command group type to its behavior.',
+				leftItems: [
+					'SequentialCommandGroup',
+					'ParallelCommandGroup',
+					'ParallelRaceGroup',
+					'ParallelDeadlineGroup'
+				],
+				rightOptions: [
+					'Runs commands one after another, waiting for each to finish',
+					'Runs all commands in parallel and finishes when all are done',
+					'Runs commands in parallel and finishes when the first command finishes, cancelling the rest',
+					'Runs commands in parallel and finishes when a specified deadline command finishes, cancelling the others'
+				],
+				answerMap: {
+					'SequentialCommandGroup': 'Runs commands one after another, waiting for each to finish',
+					'ParallelCommandGroup': 'Runs all commands in parallel and finishes when all are done',
+					'ParallelRaceGroup': 'Runs commands in parallel and finishes when the first command finishes, cancelling the rest',
+					'ParallelDeadlineGroup': 'Runs commands in parallel and finishes when a specified deadline command finishes, cancelling the others'
+				},
+				explanation: 'SequentialCommandGroup is serial; ParallelCommandGroup waits for all; ParallelRaceGroup ends when any finishes; ParallelDeadlineGroup ends when the deadline command finishes.'
+			},
+			{
+				type: 'tf',
+				question: 'True or False: Command groups can be nested inside each other.',
+				answer: true,
+				explanation: 'True. Command groups can contain other command groups to build complex behaviors from simpler ones.'
+			},
+			{
+				type: 'mcq',
+				question: 'Who originally developed Java, and what was its slogan?',
+				options: [
+					'Sun Microsystems – "Write Once, Run Anywhere" (WORA)',
+					'Oracle – "Code Everywhere"',
+					'Microsoft – "Run on Windows"',
+					'IBM – "Enterprise Ready"'
+				],
+				answer: 0,
+				explanation: 'Java was developed by Sun Microsystems with the slogan "Write Once, Run Anywhere" (WORA).'
+			}
+		];
+
+		let current = 0;
+		let score = 0;
+		let locked = false;
+		let dragOrder = [];
+		let draggingIndex = null;
+		let draggingElement = null;
+
+		const meta = document.getElementById('meta');
+		const progress = document.getElementById('progress');
+		const questionEl = document.getElementById('question');
+		const optionsEl = document.getElementById('options');
+		const feedbackEl = document.getElementById('feedback');
+		const submitBtn = document.getElementById('submitBtn');
+		const nextBtn = document.getElementById('nextBtn');
+		const resultSection = document.getElementById('resultSection');
+		const resultTitle = document.getElementById('resultTitle');
+		const resultText = document.getElementById('resultText');
+		const restartBtn = document.getElementById('restartBtn');
+		const restartMidBtn = document.getElementById('restartMidBtn');
+		const quizSection = document.getElementById('quizSection');
+		const sidebarEl = document.getElementById('sidebar');
+
+		const questionResults = Array(questions.length).fill(null);
+
+		function shuffled(arr) {
+			const copy = [...arr];
+			for (let i = copy.length - 1; i > 0; i -= 1) {
+				const j = Math.floor(Math.random() * (i + 1));
+				[copy[i], copy[j]] = [copy[j], copy[i]];
+			}
+			return copy;
+		}
+
+		function buildSidebar() {
+			if (!sidebarEl) return;
+			sidebarEl.innerHTML = '';
+
+			const title = document.createElement('div');
+			title.className = 'sidebar-title';
+			title.textContent = 'Questions';
+			sidebarEl.appendChild(title);
+
+			const list = document.createElement('div');
+			list.className = 'sidebar-list';
+
+			questions.forEach((_, index) => {
+				const btn = document.createElement('button');
+				btn.type = 'button';
+				btn.className = 'sidebar-btn';
+				btn.textContent = String(index + 1);
+				btn.dataset.index = String(index);
+				btn.addEventListener('click', () => {
+					current = index;
+					renderQuestion();
+				});
+				list.appendChild(btn);
+			});
+
+			sidebarEl.appendChild(list);
+		}
+
+		function updateSidebar() {
+			if (!sidebarEl) return;
+			const buttons = sidebarEl.querySelectorAll('.sidebar-btn');
+			buttons.forEach((btn) => {
+				const idx = Number(btn.dataset.index);
+				btn.classList.toggle('active', idx === current);
+
+				btn.classList.remove('answered-correct', 'answered-wrong');
+				if (questionResults[idx] === true) {
+					btn.classList.add('answered-correct');
+				} else if (questionResults[idx] === false) {
+					btn.classList.add('answered-wrong');
+				}
+			});
+		}
+
+		function renderMcqOrTf(q) {
+			const isTf = q.type === 'tf';
+			const choices = isTf ? ['True', 'False'] : q.options;
+			const hint = document.createElement('p');
+			hint.className = 'hint';
+			hint.textContent = isTf ? 'Choose True or False.' : 'Choose one answer.';
+			optionsEl.appendChild(hint);
+
+			if (isTf) {
+				choices.forEach((optionText, index) => {
+					const label = document.createElement('label');
+					label.className = 'option';
+
+					const input = document.createElement('input');
+					input.type = 'radio';
+					input.name = 'answer';
+					input.value = String(index); // 0 = True, 1 = False
+
+					const span = document.createElement('span');
+					span.textContent = optionText;
+
+					label.appendChild(input);
+					label.appendChild(span);
+					optionsEl.appendChild(label);
+				});
+			} else {
+				const indices = shuffled(choices.map((_, i) => i));
+				indices.forEach((originalIndex) => {
+					const label = document.createElement('label');
+					label.className = 'option';
+
+					const input = document.createElement('input');
+					input.type = 'radio';
+					input.name = 'answer';
+					input.value = String(originalIndex);
+
+					const span = document.createElement('span');
+					span.textContent = choices[originalIndex];
+
+					label.appendChild(input);
+					label.appendChild(span);
+					optionsEl.appendChild(label);
+				});
+			}
+		}
+
+		function renderCheckbox(q) {
+			const hint = document.createElement('p');
+			hint.className = 'hint';
+			hint.textContent = 'Select all that apply.';
+			optionsEl.appendChild(hint);
+
+			q.options.forEach((optionText, index) => {
+				const label = document.createElement('label');
+				label.className = 'option';
+
+				const input = document.createElement('input');
+				input.type = 'checkbox';
+				input.name = 'answer';
+				input.value = String(index);
+
+				const span = document.createElement('span');
+				span.textContent = optionText;
+
+				label.appendChild(input);
+				label.appendChild(span);
+				optionsEl.appendChild(label);
+			});
+		}
+
+		function renderMatching(q) {
+			const hint = document.createElement('p');
+			hint.className = 'hint';
+			hint.textContent = 'Match each left item to one right-side choice.';
+			optionsEl.appendChild(hint);
+
+			const grid = document.createElement('div');
+			grid.className = 'match-grid';
+
+			q.leftItems.forEach((leftItem) => {
+				const row = document.createElement('div');
+				row.className = 'match-row';
+
+				const left = document.createElement('div');
+				left.textContent = leftItem;
+
+				const select = document.createElement('select');
+				select.dataset.left = leftItem;
+
+				const placeholder = document.createElement('option');
+				placeholder.value = '';
+				placeholder.textContent = 'Select a match';
+				select.appendChild(placeholder);
+
+				shuffled(q.rightOptions).forEach((opt) => {
+					const option = document.createElement('option');
+					option.value = opt;
+					option.textContent = opt;
+					select.appendChild(option);
+				});
+
+				row.appendChild(left);
+				row.appendChild(select);
+				grid.appendChild(row);
+			});
+
+			optionsEl.appendChild(grid);
+		}
+
+		function renderDragDrop(q) {
+			const hint = document.createElement('p');
+			hint.className = 'hint';
+			hint.textContent = 'Drag items to reorder them from first step to last.';
+			optionsEl.appendChild(hint);
+
+			dragOrder = shuffled(q.items);
+
+			const list = document.createElement('ul');
+			list.className = 'drag-list';
+			list.id = 'dragList';
+			optionsEl.appendChild(list);
+			drawDragItems();
+		}
+
+		function renderDragDropCategory(q) {
+			const hint = document.createElement('p');
+			hint.className = 'hint';
+			hint.textContent = 'Drag the items into the correct category.';
+			optionsEl.appendChild(hint);
+
+			const container = document.createElement('div');
+			container.className = 'drag-category-container';
+			if (current === 2) {
+				container.classList.add('vertical');
+			}
+
+			const itemPool = document.createElement('div');
+			itemPool.className = 'item-pool';
+			itemPool.innerHTML = '<h3>Items</h3>';
+			shuffled(q.items).forEach(item => {
+				const el = document.createElement('div');
+				el.className = 'drag-item-cat';
+				el.textContent = item;
+				el.draggable = true;
+				el.addEventListener('dragstart', (e) => {
+					draggingElement = el;
+					el.classList.add('dragging');
+					e.dataTransfer.effectAllowed = 'move';
+				});
+				el.addEventListener('dragend', () => {
+					if (draggingElement === el) draggingElement = null;
+					el.classList.remove('dragging');
+				});
+				itemPool.appendChild(el);
+			});
+
+			const categoriesContainer = document.createElement('div');
+			categoriesContainer.className = 'categories';
+
+			q.categories.forEach(cat => {
+				const catEl = document.createElement('div');
+				catEl.className = 'category-box';
+				catEl.innerHTML = `<h4>${cat}</h4>`;
+				catEl.dataset.category = cat;
+
+				catEl.addEventListener('dragover', (e) => {
+					e.preventDefault();
+					catEl.classList.add('over');
+				});
+				catEl.addEventListener('dragleave', () => {
+					catEl.classList.remove('over');
+				});
+				catEl.addEventListener('drop', (e) => {
+					e.preventDefault();
+					catEl.classList.remove('over');
+					if (draggingElement) {
+						catEl.appendChild(draggingElement);
+					}
+				});
+				categoriesContainer.appendChild(catEl);
+			});
+
+			itemPool.addEventListener('dragover', (e) => {
+				e.preventDefault();
+			});
+
+			itemPool.addEventListener('drop', (e) => {
+				e.preventDefault();
+				if (draggingElement) {
+					itemPool.appendChild(draggingElement);
+				}
+			});
+
+			if (current === 2) {
+				container.appendChild(categoriesContainer);
+				container.appendChild(itemPool);
+			} else {
+				container.appendChild(itemPool);
+				container.appendChild(categoriesContainer);
+			}
+			optionsEl.appendChild(container);
+		}
+
+		function renderInteractiveMultimeter(q) {
+			const hint = document.createElement('p');
+			hint.className = 'hint';
+			hint.textContent = 'Click on the correct setting.';
+			optionsEl.appendChild(hint);
+
+			const multimeterContainer = document.createElement('div');
+			multimeterContainer.className = 'multimeter';
+			const dial = document.createElement('div');
+			dial.className = 'dial';
+
+			q.options.forEach(opt => {
+				const optEl = document.createElement('div');
+				optEl.className = 'dial-option';
+				optEl.textContent = opt;
+				optEl.dataset.value = opt;
+				optEl.addEventListener('click', () => {
+					document.querySelectorAll('.dial-option').forEach(el => el.classList.remove('selected'));
+					optEl.classList.add('selected');
+				});
+				dial.appendChild(optEl);
+			});
+
+			multimeterContainer.appendChild(dial);
+			optionsEl.appendChild(multimeterContainer);
+		}
+
+		function drawDragItems() {
+			const list = document.getElementById('dragList');
+			if (!list) return;
+			list.innerHTML = '';
+
+			dragOrder.forEach((itemText, index) => {
+				const li = document.createElement('li');
+				li.className = 'drag-item';
+				li.draggable = true;
+				li.dataset.index = String(index);
+				li.textContent = `${index + 1}. ${itemText}`;
+
+				li.addEventListener('dragstart', () => {
+					draggingIndex = index;
+					li.classList.add('dragging');
+				});
+
+				li.addEventListener('dragend', () => {
+					li.classList.remove('dragging');
+					draggingIndex = null;
+					document.querySelectorAll('.drag-item.over').forEach((el) => el.classList.remove('over'));
+				});
+
+				li.addEventListener('dragover', (event) => {
+					event.preventDefault();
+					li.classList.add('over');
+				});
+
+				li.addEventListener('dragleave', () => {
+					li.classList.remove('over');
+				});
+
+				li.addEventListener('drop', (event) => {
+					event.preventDefault();
+					li.classList.remove('over');
+					const targetIndex = Number(li.dataset.index);
+					if (draggingIndex === null || targetIndex === draggingIndex) return;
+					const moved = dragOrder.splice(draggingIndex, 1)[0];
+					dragOrder.splice(targetIndex, 0, moved);
+					drawDragItems();
+				});
+
+				list.appendChild(li);
+			});
+		}
+
+		function renderQuestion() {
+			const q = questions[current];
+			meta.textContent = `Question ${current + 1} / ${questions.length}`;
+			progress.style.width = `${((current + 1) / questions.length) * 100}%`;
+			questionEl.textContent = q.question;
+			optionsEl.innerHTML = '';
+			feedbackEl.className = 'feedback';
+			feedbackEl.textContent = '';
+			submitBtn.disabled = false;
+			nextBtn.disabled = true;
+			locked = false;
+			if (restartMidBtn) restartMidBtn.style.display = 'none';
+
+			if (q.type === 'matching') {
+				renderMatching(q);
+			} else if (q.type === 'dragdrop') {
+				renderDragDrop(q);
+			} else if (q.type === 'checkbox') {
+				renderCheckbox(q);
+			} else if (q.type === 'dragdrop-category') {
+				renderDragDropCategory(q);
+			} else if (q.type === 'interactive-multimeter') {
+				renderInteractiveMultimeter(q);
+			} else {
+				renderMcqOrTf(q);
+			}
+
+			updateSidebar();
+		}
+
+		function gradeQuestion(q) {
+			if (q.type === 'mcq') {
+				const checked = document.querySelector('input[name="answer"]:checked');
+				if (!checked) return { answered: false };
+				const choice = Number(checked.value);
+				return { answered: true, correct: choice === q.answer, correctText: q.options[q.answer] };
+			}
+
+			if (q.type === 'tf') {
+				const checked = document.querySelector('input[name="answer"]:checked');
+				if (!checked) return { answered: false };
+				const choice = Number(checked.value) === 0;
+				const correctText = q.answer ? 'True' : 'False';
+				return { answered: true, correct: choice === q.answer, correctText };
+			}
+
+			if (q.type === 'checkbox') {
+				const checked = Array.from(document.querySelectorAll('input[name="answer"]:checked')).map(el => Number(el.value));
+				if (checked.length === 0) return { answered: false };
+				const correct = q.answer.every(val => checked.includes(val)) && q.answer.length === checked.length;
+				const correctText = q.options.filter((_, i) => q.answer.includes(i)).join(', ');
+				return { answered: true, correct, correctText };
+			}
+
+			if (q.type === 'matching') {
+				const selects = Array.from(optionsEl.querySelectorAll('select[data-left]'));
+				if (selects.some((sel) => !sel.value)) return { answered: false };
+				const correct = selects.every((sel) => q.answerMap[sel.dataset.left] === sel.value);
+				return { answered: true, correct, correctText: 'all matches aligned' };
+			}
+
+			if (q.type === 'dragdrop') {
+				// For Question 3 (index 2), only the first three positions must match the three main auto steps
+				if (current === 2) {
+					let correct = true;
+					for (let i = 0; i < q.correctOrder.length; i += 1) {
+						if (dragOrder[i] !== q.correctOrder[i]) {
+							correct = false;
+							break;
+						}
+					}
+					return { answered: true, correct, correctText: q.correctOrder.join(' → ') };
+				}
+
+				const correct = q.correctOrder.every((step, index) => dragOrder[index] === step);
+				return { answered: true, correct, correctText: q.correctOrder.join(' → ') };
+			}
+
+			if (q.type === 'dragdrop-category') {
+				const categoryBoxes = optionsEl.querySelectorAll('.category-box');
+				let allCorrect = true;
+
+				for (const box of categoryBoxes) {
+					const category = box.dataset.category;
+					const requirement = q.answer[category];
+					if (!requirement) {
+						allCorrect = false;
+						break;
+					}
+
+					const items = Array.from(box.querySelectorAll('.drag-item-cat')).map(el => el.textContent.trim());
+					const counts = {};
+					items.forEach((label) => {
+						counts[label] = (counts[label] || 0) + 1;
+					});
+
+					const requiredTotal = Object.values(requirement).reduce((sum, n) => sum + n, 0);
+					if (items.length !== requiredTotal) {
+						allCorrect = false;
+						break;
+					}
+
+					for (const [label, needed] of Object.entries(requirement)) {
+						if ((counts[label] || 0) !== needed) {
+							allCorrect = false;
+							break;
+						}
+					}
+
+					if (!allCorrect) break;
+				}
+
+				return { answered: true, correct: allCorrect, correctText: 'Items correctly categorized.' };
+			}
+
+			if (q.type === 'interactive-multimeter') {
+				const selected = document.querySelector('.dial-option.selected');
+				if (!selected) return { answered: false };
+				const value = selected.dataset.value;
+				return { answered: true, correct: value === q.answer, correctText: q.answer };
+			}
+
+			return { answered: false };
+		}
+
+		submitBtn.addEventListener('click', () => {
+			const q = questions[current];
+			const result = gradeQuestion(q);
+
+			if (!result.answered) {
+				feedbackEl.className = 'feedback bad';
+				feedbackEl.textContent = 'Complete this question before checking your answer.';
+				return;
+			}
+
+			// Mark that this question has been attempted so Next is allowed, but keep
+			// Check Answer enabled for multiple attempts.
+			locked = true;
+			nextBtn.disabled = false;
+
+			questionResults[current] = result.correct;
+			updateSidebar();
+			if (restartMidBtn) restartMidBtn.style.display = 'inline-block';
+
+			// Clear previous visual feedback on options/rows/boxes so multiple
+			// attempts can re-color cleanly.
+			optionsEl.querySelectorAll('.option').forEach((label) => {
+				label.style.background = '';
+				label.style.borderColor = '';
+			});
+			optionsEl.querySelectorAll('.match-row').forEach((row) => {
+				row.style.background = '';
+				row.style.borderColor = '';
+			});
+			optionsEl.querySelectorAll('.category-box').forEach((box) => {
+				box.style.background = '';
+				box.style.borderColor = '';
+			});
+			optionsEl.querySelectorAll('.dial-option').forEach((opt) => {
+				opt.style.background = '';
+				opt.style.borderColor = '';
+			});
+
+			if (result.correct) {
+				feedbackEl.className = 'feedback ok';
+				feedbackEl.textContent = `✅ Correct. ${q.explanation}`;
+			} else {
+				feedbackEl.className = 'feedback bad';
+				feedbackEl.textContent = `❌ Not quite. Correct answer: ${result.correctText}. Why: ${q.explanation}`;
+			}
+
+			// Per-question-type highlighting of the answers the person selected.
+			if (q.type === 'mcq' || q.type === 'tf') {
+				const options = optionsEl.querySelectorAll('.option');
+				const checked = optionsEl.querySelector('input[name="answer"]:checked');
+				const chosenLabel = checked ? checked.closest('.option') : null;
+				const correctIndex = q.type === 'mcq' ? q.answer : (q.answer ? 0 : 1);
+
+				if (chosenLabel) {
+					if (result.correct) {
+						chosenLabel.style.background = '#dcfce7';
+						chosenLabel.style.borderColor = '#4ade80';
+					} else {
+						chosenLabel.style.background = '#fee2e2';
+						chosenLabel.style.borderColor = '#b91c1c';
+					}
+				}
+
+				// Also highlight the correct answer in green so it is obvious.
+				options.forEach((label) => {
+					const input = label.querySelector('input');
+					if (!input) return;
+					if (Number(input.value) === correctIndex) {
+						label.style.background = '#dcfce7';
+						label.style.borderColor = '#4ade80';
+					}
+				});
+			} else if (q.type === 'checkbox') {
+				const options = optionsEl.querySelectorAll('.option');
+				const correctSet = new Set(q.answer || []);
+				options.forEach((label) => {
+					const input = label.querySelector('input');
+					if (!input) return;
+					const idx = Number(input.value);
+					if (input.checked) {
+						if (correctSet.has(idx)) {
+							label.style.background = '#dcfce7';
+							label.style.borderColor = '#4ade80';
+						} else {
+							label.style.background = '#fee2e2';
+							label.style.borderColor = '#b91c1c';
+						}
+					}
+				});
+			} else if (q.type === 'matching') {
+				// For all matching questions, color each row green/red based on
+				// whether that pair is correct.
+				const rows = optionsEl.querySelectorAll('.match-row');
+				rows.forEach((row) => {
+					const select = row.querySelector('select[data-left]');
+					if (!select) return;
+					const leftKey = select.dataset.left;
+					const selected = select.value;
+					const expected = q.answerMap[leftKey];
+					if (selected && selected === expected) {
+						row.style.background = '#dcfce7';
+						row.style.borderColor = '#4ade80';
+					} else {
+						row.style.background = '#fee2e2';
+						row.style.borderColor = '#b91c1c';
+					}
+				});
+			} else if (q.type === 'dragdrop-category') {
+				// For all drag-drop category questions (including Q3 and Q8), color
+				// each category box green/red based on whether its contents match
+				// the required items.
+				const categoryBoxes = optionsEl.querySelectorAll('.category-box');
+				categoryBoxes.forEach((box) => {
+					const category = box.dataset.category;
+					const requirement = q.answer[category];
+					let boxCorrect = true;
+
+					if (!requirement) {
+						boxCorrect = false;
+					} else {
+						const items = Array.from(box.querySelectorAll('.drag-item-cat')).map(el => el.textContent.trim());
+						const counts = {};
+						items.forEach((label) => {
+							counts[label] = (counts[label] || 0) + 1;
+						});
+
+						const requiredTotal = Object.values(requirement).reduce((sum, n) => sum + n, 0);
+						if (items.length !== requiredTotal) {
+							boxCorrect = false;
+						} else {
+							for (const [label, needed] of Object.entries(requirement)) {
+								if ((counts[label] || 0) !== needed) {
+									boxCorrect = false;
+									break;
+								}
+							}
+						}
+					}
+
+					if (boxCorrect) {
+						box.style.background = '#dcfce7';
+						box.style.borderColor = '#4ade80';
+					} else {
+						box.style.background = '#fee2e2';
+						box.style.borderColor = '#b91c1c';
+					}
+				});
+			} else if (q.type === 'interactive-multimeter') {
+				const selected = optionsEl.querySelector('.dial-option.selected');
+				if (selected) {
+					if (result.correct) {
+						selected.style.background = '#dcfce7';
+						selected.style.borderColor = '#4ade80';
+					} else {
+						selected.style.background = '#fee2e2';
+						selected.style.borderColor = '#b91c1c';
+					}
+				}
+
+				// Also show the correct dial position in green.
+				optionsEl.querySelectorAll('.dial-option').forEach((opt) => {
+					if (opt.dataset.value === q.answer) {
+						opt.style.background = '#dcfce7';
+						opt.style.borderColor = '#4ade80';
+					}
+				});
+			}
+		});
+
+		nextBtn.addEventListener('click', () => {
+			if (!locked) return;
+			current += 1;
+
+			if (current >= questions.length) {
+				quizSection.style.display = 'none';
+				resultSection.style.display = 'block';
+				score = questionResults.filter((v) => v === true).length;
+				const pct = Math.round((score / questions.length) * 100);
+				resultTitle.textContent = `You scored ${score} / ${questions.length} (${pct}%)`;
+
+				if (pct >= 85) {
+					resultText.textContent = 'Strong run. You have solid pit-programmer recall.';
+				} else if (pct >= 65) {
+					resultText.textContent = 'Good start. Review the explanations on missed questions and retry.';
+				} else {
+					resultText.textContent = 'Keep practicing. Focus on CAN layout, command-based structure, and vision/odometry concepts.';
+				}
+				return;
+			}
+
+			renderQuestion();
+		});
+
+		function restartQuiz() {
+			current = 0;
+			for (let i = 0; i < questionResults.length; i += 1) questionResults[i] = null;
+			score = 0;
+			resultSection.style.display = 'none';
+			quizSection.style.display = 'block';
+			if (restartMidBtn) restartMidBtn.style.display = 'none';
+			renderQuestion();
+		}
+
+		function restartQuestion() {
+			// Clear result for current question and recompute score from remaining correct answers
+			questionResults[current] = null;
+			score = questionResults.filter((v) => v === true).length;
+			if (restartMidBtn) restartMidBtn.style.display = 'none';
+			renderQuestion();
+		}
+
+		restartBtn.addEventListener('click', restartQuiz);
+		if (restartMidBtn) restartMidBtn.addEventListener('click', restartQuestion);
+
+		buildSidebar();
+		renderQuestion();
+	</script>
+</body>
+</html>
